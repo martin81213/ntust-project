@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <title>Simple Map</title>
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=default"></script>
+    <link rel="stylesheet" type="text/css" href="static/style.css" />
+    
+    <script src="https://code.jquery.com/jquery-3.4.1.js" integrity="sha256-WpOohJOqMqqyKL9FccASB9O0KwACQJpFTUBLTYOVvVU="crossorigin="anonymous"></script> 
+  </head>
+  <body>
+    <div id="map"></div>
+
+    <!-- Async script executes immediately and must be after any DOM elements used in callback. -->
+    <script
+      src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBXpFhvMKLS9gn-p-uKMZt0iOtyi61OZCk&callback=initMap&v=weekly&libraries=visualization"
+      async
+    ></script>
+
+
+  </body>
+  <script src="static/index.js" charset = "UTF-8"></script>
+  <script>
+     var imgId="{{val}}";
+
+
+    // UI
+    var btn = false;
+    
+    function openLeft_dh() {
+      if(btn){
+        $("#left_dh").css({"width":"0","transition":"0.3s"});
+        $("#black_bg").css("display","none");
+        
+      }
+      else{
+        $("#left_dh").css({"width":"180px","transition":"0.3s"});
+        $("#black_bg").css("display","block");
+      }
+      btn = !btn;
+        
+    }
+    // UI
+
+  </script>
+</html>

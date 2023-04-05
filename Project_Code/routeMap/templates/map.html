@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<head>
+  <meta charset="UTF-8" />
+  <title>路徑安全規劃及座標化事件系統</title>
+  <script src="https://polyfill.io/v3/polyfill.min.js?features=default"></script>
+  <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.3.1/css/all.css"
+    integrity="sha384-mzrmE5qonljUremFsqc01SB46JvROS7bZs3IO2EmfFsd15uHvIt+Y8vEf7N7fWAU" crossorigin="anonymous" />
+
+  <script src="https://code.jquery.com/jquery-3.6.0.js"></script>
+  <script src="https://malsup.github.io/jquery.form.js"></script>
+  <script src="https://code.jquery.com/ui/1.13.0/jquery-ui.js"></script>
+
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+
+  <link rel="stylesheet" type="text/css" href="../static/App.css" />
+
+  <style type="text/css">
+    .dialog {
+      position: fixed;
+      -webkit-user-select: text;
+      -moz-user-select: text;
+      -o-user-select: text;
+      user-select: text;
+      width: 80vw;
+      max-width: 500px;
+      top: 50%;
+      left: 50%;
+      max-height: 80vh;
+      transform: translate(-50%, -50%);
+      padding: 10px;
+      border: 1px solid;
+      background-color: #B7E8FA;
+      box-shadow: 0px 0px 10px #000000;
+      overflow-y: auto;
+      display: none;
+    }
+
+    .dialog>.close {
+      position: absolute;
+      top: 2px;
+      right: 2px;
+      cursor: pointer;
+    }
+  </style>
+
+  <script src="../static/Main.js"></script>
+  <script src="../static/ui.js"></script>
+  <script>
+    var dialog;
+    window.onload = function () {
+      dialog = document.getElementById("dialog");
+    }
+    function showDialog() {
+      dialog.style.display = "block";
+    }
+    function closeDialog() {
+      dialog.style.display = "none";
+    }
+  </script>
+</head>
+
+<body>
+  <div class="menu" id="menu">
+
+    <div class="leftMenu" id="leftMenu">
+      <div id="controlButton">
+        <i id='controlButton-icon' class="fa fa-times" aria-hidden="true" style="font-size: 35px;"></i>
+      </div>
+
+      <div class="MenuContent" id="main_panel">
+        <div class="MenuContent-word">
+          選擇
+        </div>
+        <div>
+          <button id="createForm">新增事故點<i class="fa fa-exclamation-triangle" aria-hidden="true"></i></button>
+        </div>
+        <div>
+          <button id="showAllPointsBtn">查詢熱門事故點<i class="fa fa-paragraph" aria-hidden="true"></i></button>
+        </div>
+        <div>
+          <button onclick="location.href='/analysis';">資料分析<i class="fa fa-pie-chart" aria-hidden="true"></i></button>
+        </div>
+        <div class="hotbutton">
+          <label><input type="checkbox" id="kde_">顯示車禍熱點</label><br>
+        </div>
+        <div class="hotbutton">
+          <label><input type="checkbox" id="mor_">顯示特殊熱點</label>
+        </div>
+        <div>
+          <button onclick="showDialog();" style="background-color: #496dab;">使用方法<i class="fa fa-question-circle"
+              aria-hidden="true"></i></button>
+          <div id="dialog" class="dialog">
+            <div onclick="closeDialog();" class="close">X</div>
+            <center> ~ 使用者說明 ~ </center><br>
+            <b>新增事故點</b> : 可輸入標題, 使用者暱稱, 地點, 事件狀況, 備註以及上傳圖片來為其他使用者提供資料。<br><br>
+            <b>資料分析</b> : 各縣市的車禍比例以及歷年的車禍次數統計，可以藉由點選圓餅圖上面的縣市來取消點選縣市的比例，選取要關注的縣市。<br><br>
+            <b>顯示車禍熱點</b> : 將過去發生車禍的地方以熱度圖的方式呈現在圖上<br><br>
+            <b>顯示特殊熱點</b> : 將過去發生車禍的地方分析後，找出特殊熱點，其熱點車禍事件高於周遭地區，需特別注意。<br><br>
+            <b>查詢熱門事故點</b> : 可以透過此選項去查看現在有哪些地方有事故，並可為當前的事件進行推送的操作，讓事件的優先度上升，讓更多人看到!<br><br>
+            <b>避開範圍</b> : 點選後會有一個方框可以在地圖拖曳，可利用此功能繞開不想要經過的區域。點擊地圖上任意區域，移除避開範圍。<br><br>
+          </div>
+        </div>
+      </div>
+
+      <!-- form -->
+      <div class="MenuContent" id="formPage">
+        <div class="MenuContent-word">
+          建立事件
+        </div>
+        <form id="eventForm" method="post" action="/insertPoint" enctype="multipart/form-data">{% csrf_token %}
+
+          <fieldset>
+            <label for="heading">標題 </label><br>
+            <input type="text" name="situaName" id="situaName" required="required" /><br>
+            <label for="posterName">使用者暱稱</label><br>
+            <input type="text" name="posterName" id="posterName" class="text ui-widget-content ui-corner-all"><br>
+            <label>地點</label><br>
+            <input type="text" id="eventPosition" required="required">
+            <i class="far fa-dot-circle" onclick="markerShow()"></i><br>
+
+            <label for="eventStatus">事件狀況</label><br>
+            <select name="situation" id="situation" class="multi-selector" 事件狀況>
+              <option value=0>路障</option>
+              <option value=1>車道問題</option>
+              <option value=2>車禍</option>
+              <option value=3>遊行市集</option>
+              <option value=4>其他</option>
+            </select><br>
+            <label for="remark">備註</label><br> <textarea name="remark" id="remark"
+              placeholder="Enter the text..."></textarea><br><br>
+            <input type="file" name=picLink id="picLink" accept="image/gif, image/jpeg, image/png" />
+            <img id="preview_progressbarTW_img" src="#" /><br>
+            <input type="hidden" id="eventLng" name="lng" value="0">
+            <input type="hidden" id="eventLat" name="lat" value="0">
+            <input type="hidden" id="addr" name="physicalAddr">
+            <input type="submit" id="submit_" value="傳送" />
+          </fieldset>
+
+        </form>
+      </div>
+
+      <!-- route page -->
+      <template id="routePageTemplate">
+        <div class="MenuContent" id="routePage">
+          <div class="MenuContent-word">
+            導航路線
+          </div>
+          <div class="routeList">
+            <template id="routeItemTemplate">
+              <div class="routeItem">
+                <div class="routeItem-word">
+                </div>
+                <div style="clear: left;"></div>
+                <div class="routeItem-goButton">
+                  開始導航
+                </div>
+                <div class="routeItem-showEventButton">
+                  顯示路徑事件
+                </div>
+              </div>
+            </template>
+          </div>
+        </div>
+      </template>
+
+      <!-- event page-->
+      <template id="eventPageTemplate">
+        <div class="MenuContent" id="eventPointPage">
+          <div class="MenuContent-word">
+            相關事件點
+          </div>
+          <div class="fullSelect">
+            <select class="Taiwan" name="Taiwan">
+              <option name="全台灣">全台</option>
+              <optgroup label="北部">
+                <option name="台北市">台北市</option>
+                <option name="新北市">新北市</option>
+                <option name="基隆市">基隆市</option>
+                <option name="新竹縣">新竹縣</option>
+                <option name="新竹市">新竹市</option>
+                <option name="桃園市">桃園市</option>
+                <option name="宜蘭縣">宜蘭縣</option>
+              </optgroup>
+              <optgroup label="中部">
+                <option name="台中市">台中市</option>
+                <option name="苗栗縣">苗栗縣</option>
+                <option name="彰化縣">彰化縣</option>
+                <option name="南投縣">南投縣</option>
+                <option name="雲林縣">雲林縣</option>
+              </optgroup>
+              <optgroup label="南部">
+                <option name="高雄市">高雄市</option>
+                <option name="台南市">台南市</option>
+                <option name="嘉義縣">嘉義縣</option>
+                <option name="嘉義市">嘉義市</option>
+                <option name="新竹縣">新竹市</option>
+                <option name="屏東縣">屏東縣</option>
+                <option name="澎湖縣">澎湖縣</option>
+              </optgroup>
+              <optgroup label="東部">
+                <option name="花蓮縣">花蓮縣</option>
+                <option name="台東縣">台東縣</option>
+              </optgroup>
+              <optgroup label="離島">
+                <option name="金門縣">金門縣</option>
+                <option name="連江縣">連江縣</option>
+              </optgroup>
+            </select>
+            <select class="TaiSituation" name="TaiSituation">
+              <option value=0>全部事件</option>
+              <option value=1>路障</option>
+              <option value=2>車道問題</option>
+              <option value=3>車禍</option>
+              <option value=4>遊行市集</option>
+              <option value=5>其他</option>
+            </select><br>
+          </div>
+          <div class="eventList">
+            <template id="eventItemTemplate">
+              <div class="eventItem">
+                <div class="eventItem-title">
+                </div>
+                <div class="eventItem-pushNum">
+                </div>
+                <div class="eventItem-time">
+                </div>
+                <div style="clear: left;"></div>
+              </div>
+            </template>
+          </div>
+        </div>
+      </template>
+
+      <!-- event detail -->
+      <template id="detailPageTemplate">
+        <div class="MenuContent" id="eventDetailPage">
+          <b>
+            <div class="MenuContent-word">
+              事件點資訊
+            </div>
+          </b>
+          <div class="detail-top">
+            <b>
+              <div class="detail-title" name="detail-title"></div>
+            </b>
+            <div class="detail-state"><b>上傳時間:</b></div><br>
+            <div class="detail-value" name="detail-time"></div><br>
+
+            <div class="detail-state"><b>上傳使用者:</b></div><br>
+            <div class="detail-value" name="detail-poster"></div><br>
+
+            <div style="clear: left;"></div>
+          </div>
+          <div class="detail-bottom">
+            <div class="detail-state"><b>備註:</b></div>
+            <div style="clear: left;"></div>
+            <div class="detail-describe" name="detail-describe"></div>
+            <div class="detail-state"><b>圖片:</b></div>
+            <div style="clear: left;"></div>
+            <img class="detail-img" name="piclink">
+            <button class="detail-btn" name="detail-pushBtn"><b>推推</b></button>
+            <button class="detail-btn" name="detail-solveBtn"><b>回報解決</b></button>
+
+            <div style="clear: right;"></div>
+
+          </div>
+        </div>
+      </template>
+
+
+    </div>
+
+    <div class="menuBtn" id="menuBtn">
+      <i class="fa fa-angle-double-right" aria-hidden="true"></i>
+    </div>
+
+  </div>
+  <div class="pac-card" id="pac-card" style="position: absolute; left: 196px; top: 0px;">
+    <!-- start pos -->
+    <div class="form-group">
+      <div onclick="dropStartPosMar();" for="from" id="startt_" class="icon__"><i class="far fa-dot-circle" style="font-size: 24px; text-align: center;display: inline-block;
+          width: 100%;"></i></div>
+      <input type="text" id="from" placeholder="Origin" class="form-control pac-target-input" required="required"
+        autocomplete="off">
+      <!-- end pos -->
+    </div>
+    <div class="form-group">
+      <div onclick="dropDestPosMar();" for="to" id="tot_" class="icon__"><i class="fas fa-map-marker-alt" style="font-size: 24px; text-align: center; display:inline-block;
+          width: 100%;"></i></div>
+      <input type="text" id="to" placeholder="Destination" class="form-control pac-target-input" required="required"
+        autocomplete="off">
+    </div>
+    <div class="form-group">
+      <button id="routeBtn" class="btn btn-info btn-lg" onclick="calcRoute();">
+        <i class="fas fa-map-signs"></i>
+      </button>
+
+      <button id="blockBtn"><i class="fa fa-ban" aria-hidden="true"></i></button>
+
+    </div>
+  </div>
+
+  <!-- map -->
+  <div id="map"></div>
+
+  <script>
+    $(document).ready(function () {
+      // preview upload img
+      $("#picLink").change(function () {
+        if (this.files && this.files[0]) {
+          var reader = new FileReader();
+          reader.onload = function (e) {
+            $("#preview_progressbarTW_img").attr('src', e.target.result);
+          }
+          reader.readAsDataURL(this.files[0]);
+        }
+      });
+    });
+
+
+  </script>
+
+  <!-- Async script executes immediately and must be after any DOM elements used in callback. -->
+  <script
+    src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBU95sipv3saKEl9qTvFHYMe8ScGwNqDRk&language=zh-TW&callback=initMap&libraries=places,geometry,drawing&v=weekly"
+    async></script>
+</body>
+
+</html>

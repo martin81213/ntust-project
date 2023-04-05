@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+
+<html>
+    <head>
+        <meta charset="utf-8">
+        <title>test</title>
+        <script src="https://code.jquery.com/jquery-3.6.0.js"></script>
+        <script src="https://code.jquery.com/ui/1.13.0/jquery-ui.js"></script>
+    </head>
+  
+  <body>
+    <script>
+        $(function() {
+
+          $( "#createForm" ).button().click(function() {
+              $( "#dialog-createEvent" ).dialog( "open" );
+          });
+
+          $( "#dialog-createEvent" ).dialog({
+            autoOpen: true,
+            // height: 500,
+            // width: 350,
+            height: $(document).height*0.8,
+            width: $(document).width * 0.8,
+            modal: true,
+            buttons: {
+              "submit": function(e) {
+                var form = $('#eventForm');
+                $.ajax({
+                      type: "POST",
+                      url: "/test/",
+                      data: {
+                        data: form.serialize(), // serializes the form's elements.
+                        //data: {posterName: eventForm.posterName, remark: eventForm.remark},
+                        csrfmiddlewaretoken: "{{ csrf_token }}",
+                      }, //  **POST必要**  ，csrf設定
+                      success: function(data)
+                      {
+                          console.log(data);
+                          alert(data); // show response from the php script.
+                          $( "#dialog-createEvent" ).dialog( "close" );
+                      },
+                      error: function (error) {
+                        console.log("error:", error);
+                      },
+                    });
+
+                e.preventDefault(); // avoid to execute the actual submit of the form.
+              },
+              // Cancel: function() {
+              //   $( this ).dialog( "close" );
+              // }
+            },
+          });
+       
+        });
+    </script>
+
+
+    <div id="aa" title="google map" align="center">
+        <form action="" id="nameform">
+            <label>map~</label>
+        </form>
+    </div>
+
+    <style>
+      div{
+        font-size:x-large;
+        width: auto;
+        height: auto ;
+        margin: 20px auto;
+        padding: 50px;
+        border-width: 10px;
+        line-height: 1.5;
+
+      }
+      button{
+        font-size:x-large;
+        width: auto;
+        height: auto ;
+        margin: 20px auto;
+        border-width: 20px;
+        line-height: 1.5;
+      }
+    </style>
+
+    <div id="dialog-createEvent" title="建立新事件">
+        <p ></p>
+        <form
+        id="eventForm"
+        method="post">
+        <fieldset>
+          <label for="posterName">使用者暱稱</label><br>
+          <input type="text" name="posterName" id="posterName" class="text ui-widget-content ui-corner-all"><br>
+          <label for="eventStatus">事件狀況</label><br>
+          <select  name="situation" class="multi-selector" 事件狀況>
+            <option value=0>路障</option>
+            <option value=1>車道問題</option>
+            <option value=2>車禍</option>
+            <option value=3>遊行市集</option>
+            <option value=4>其他</option>
+          </select><br>
+          <label for="remark">備註</label><br>
+          <input type="text" name="remark" id="remark" value="" class="text ui-widget-content ui-corner-all"> <br><br>
+          <button id="uploadImage">上傳圖片</button>
+        </fieldset>
+        </form>
+    </div>
+
+    <button id="createForm">建立事件</button>
+ 
+ 
+  </body>
+</html>

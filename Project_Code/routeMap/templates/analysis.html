@@ -1,0 +1,765 @@
+<!DOCTYPE html>
+<html>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<head>
+  <script src="https://code.jquery.com/jquery-3.4.1.js" integrity="sha256-WpOohJOqMqqyKL9FccASB9O0KwACQJpFTUBLTYOVvVU="
+    crossorigin="anonymous"></script>
+  <script src="../static/node_modules/chart.js/dist/chart.min.js"></script>
+  <script src="../static/node_modules/chartjs-chart-geo/build/index.umd.min.js"></script>
+
+  <!-- https://github.com/DavideViolante/chartjs-plugin-labels -->
+  <script src="https://unpkg.com/chart.js-plugin-labels-dv/dist/chartjs-plugin-labels.min.js"></script>
+</head>
+<style>
+  body {
+    margin: 0;
+    font-family: Arial;
+  }
+
+  .wrapper {
+    display: grid;
+    width: 90%;
+    margin: auto;
+    grid-template-rows: repeat(10, 100px);
+    grid-template-columns: repeat(10, 1fr);
+    border-style: dashed;
+    border-width: 1px;
+  }
+
+  .wrapper div1 {
+    border-style: solid;
+    border-width: 1px;
+  }
+
+  .mapDiv {
+    grid-row: 1 / 7;
+    grid-column: 1 / 7;
+    max-width: 100%;
+    max-height: 100%;
+    min-width: 0;
+    min-height: 0;
+    z-index: 1;
+  }
+
+  .pieDiv {
+    grid-row: 1/5;
+    grid-column: 7 / 11;
+    min-width: 0;
+    min-height: 0;
+    max-width: 100%;
+    max-height: 100%;
+
+    z-index: 1;
+  }
+
+  .lineDiv {
+    grid-row: 5/9;
+    grid-column: 7 / 11;
+    min-width: 0;
+    min-height: 0;
+    max-width: 100%;
+    max-height: 100%;
+    z-index: 1;
+  }
+
+  /* Responsive layout - makes a two column-layout instead of four columns */
+  @media screen and (max-width: 800px) {
+
+    /* phone */
+    .mapDiv {
+      grid-row: 1 / 6;
+      grid-column: 1 / 6;
+      max-width: 100%;
+      max-height: 100%;
+      min-width: 0;
+      min-height: 0;
+      z-index: 1;
+    }
+
+    .pieDiv {
+      grid-row: 1/5;
+      grid-column: 6 / 11;
+      min-width: 0;
+      min-height: 0;
+      max-width: 100%;
+      max-height: 100%;
+      z-index: 1;
+    }
+  }
+
+  /* Responsive layout - makes the two columns stack on top of each other instead of next to each other */
+  @media screen and (max-width: 600px) {
+
+    /* phone */
+    .mapDiv {
+      grid-row: 1 / 5;
+      grid-column: 1 / 11;
+      max-width: 100%;
+      max-height: 100%;
+      min-width: 0;
+      min-height: 0;
+      z-index: 1;
+    }
+
+    .pieDiv {
+      grid-row: 5/9;
+      grid-column: 2 / 9;
+      min-width: 0;
+      min-height: 0;
+      max-width: 100%;
+      max-height: 100%;
+      min-width: 0;
+      min-height: 0;
+      z-index: 1;
+    }
+
+    .lineDiv {
+      grid-row: 9/11;
+      grid-column: 1 / 11;
+      min-width: 0;
+      min-height: 0;
+      max-width: 100%;
+      max-height: 100%;
+      z-index: 1;
+    }
+
+  }
+
+  .topLayer {
+    position: relative;
+    top: 0;
+    z-index: 5;
+    margin: auto;
+    width: 100%;
+  }
+
+  .timeLine {
+    background-color: rgb(209, 209, 209);
+    width: 90%;
+    margin: auto;
+    overflow-y: auto;
+  }
+
+
+  .background {
+    width: 100px;
+    padding-top: 10px;
+    margin-top: 10px;
+    margin: auto;
+  }
+
+
+  .myborder {
+    width: 200px;
+    margin-top: 20px;
+    margin-bottom: 20px;
+    padding-left: 10px;
+    padding-right: 10px;
+    background-color: rgb(98, 158, 63);
+    cursor: col-resize;
+    opacity: 0.8;
+  }
+
+  .mybody {
+    height: 30px;
+    width: 100%;
+    cursor: move;
+    background-color: cornsilk;
+    opacity: 0.6;
+  }
+
+  ::-webkit-scrollbar {
+    -webkit-appearance: none;
+  }
+
+  ::-webkit-scrollbar:vertical {
+    width: 10px;
+  }
+
+  ::-webkit-scrollbar:horizontal {
+    height: 10px;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background-color: rgba(36, 36, 36, 0.5);
+    border-radius: 25px;
+  }
+</style>
+
+<body>
+  <h1 style="margin-left: 30px;">統計資料</h1>
+  <div class="topLayer" id="topLayer">
+    <div class="timeLine" id="timeLine">
+      <div class="background" id='background'>
+        <div class="myborder" id="myborder">
+          <div class="mybody" id="mybody"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="wrapper">
+    <div class="mapDiv">
+      <canvas id="map"></canvas>
+    </div>
+    <div class="pieDiv">
+      <canvas id="pie"></canvas>
+    </div>
+    <div class="lineDiv">
+      <canvas id="line"></canvas>
+    </div>
+    <div style="grid-row: 1/6; grid-column: 1/11;"></div>
+    <div style="grid-row: 1/11; grid-column: 1/6;"></div>
+    <!--
+    <iframe src="/map" width="100%" height="300" style="border:1px solid black;grid-row: 6/11; grid-column: 6/11;">  </iframe>
+    -->
+  </div>
+
+</body>
+
+
+<script>
+  const cityList = [
+    '臺南市', '臺中市', '雲林縣', '新北市', '高雄市', '宜蘭縣', '花蓮縣', '南投縣', '臺北市', '嘉義市',
+    '彰化縣', '臺東縣', '桃園市', '屏東縣', '嘉義縣', '新竹縣', '新竹市', '基隆市', '澎湖縣', '苗栗縣',
+    '金門縣', '連江縣'
+  ]
+  const GREY = 'rgb(100,100,100)';
+  const colorScalar = [ // blue -> white
+    "#0657f9", "#0f5ef9", "#1765f8", "#206bf8",
+    "#2972f7", "#3279f7", "#3a80f6", "#4386f6",
+    "#4c8df5", "#5494f5", "#5d9bf4", "#66a1f4",
+    "#6fa8f3", "#77aff3", "#80b6f2", "#89bcf2",
+    "#91c3f1", "#9acaf1", "#a3d1f0", "#acd7f0",
+    "#b4deef", "#bde5ef",
+  ];
+
+  const mapping_to_chinese = { // en -> ch
+    "Kaohsiung City": '高雄市', "Pingtung": '屏東縣', "Tainan City": '臺南市',
+    "Hsinchu City": '新竹市', "Hsinchu": '新竹縣', "Yilan": '宜蘭縣',
+    "Keelung City": '基隆市', "Miaoli": '苗栗縣', "Taipei City": '臺北市',
+    "New Taipei City": '新北市', "Taoyuan": '桃園市', "Changhua": '彰化縣',
+    "Chiayi": '嘉義縣', "Chiayi City": '嘉義市', "Hualien": '花蓮縣',
+    "Nantou": '南投縣', "Taichung City": '臺中市', "Yunlin": '雲林縣',
+    "Taitung": '臺東縣', "Penghu": '澎湖縣', "Kinmen": '金門縣',
+    "Lienchiang": '連江縣'
+  }
+  const MONTHS_labels = [
+    'Jan', 'Feb', 'Mar', 'Apr',
+    'May', 'Jun', 'Jul', 'Aug',
+    'Sep', 'Oct', 'Nov', 'Dec'
+  ];
+  // define
+  let xValues = Array.from(cityList); // sort label
+  let yValues = Array(22); // sort value
+  let mycolor = Array(22); // sort label color
+  let isShowing = Array(22); // map show? citylist
+  for (var i = 0; i < 22; i++)isShowing[i] = true;
+
+  // chart
+  let chartMap;
+  let pie;
+  let lineChart;
+
+
+  const beginYear = 2018;
+  const endYear = 2022;
+  const month = parseInt((endYear - beginYear) * 12);
+
+  let mydata;
+  // get data
+  $.ajax({
+    type: "GET",
+    url: "/summary",
+    dataType: "json",
+    success: function (response) {
+      mydata = Array.from(response);
+      for (let i = 0; i < 22; i++) {
+        yValues[i] = 0;
+        for (let o = 0; o < 12; o++) {
+          yValues[i] += mydata[i][o];
+        }
+      }
+      // interpolation color
+      const maxValue = yValues[0];
+      mycolor = yValues.map((d) => colorScalar[21 - parseInt(d / maxValue * 21)])
+    },
+    error: function (error) {
+    },
+    async: false
+  });
+
+
+  const picConfig = {
+    type: "pie",
+    data: {
+      labels: xValues,
+      datasets: [{
+        radius: "75%",
+        data: yValues,
+        backgroundColor: mycolor
+      }],
+      datalabels: {
+        anchor: 'end',
+      }
+    },
+    options: {
+      maintainAspectRatio: false,
+      responsive: true,
+      title: {
+        display: true,
+        text: "Pie",
+      },
+      plugins: {
+        legend: {
+          display: false
+        },
+        labels: {
+          render: 'label',
+          position: 'outside',
+          overlap: false,
+          fontSize: 12,
+        },
+        title:{
+          display:true,
+          text:'各縣市車禍比例',
+          font:{
+            size:24
+          }
+        },
+      },
+      onClick: (evt, el) => {
+        // exist element
+        // pie
+        if (el[0]) {
+          // hide
+          const cityListIndex = toCityListIndex(el[0].index);
+          pie.hide(el[0].datasetIndex, el[0].index);
+          lineChart.hide(cityListIndex);
+          isShowing[cityListIndex] = false;
+          chartMap.data.datasets[0].backgroundColor[cityListIndex] = GREY;
+          chartMap.update();
+          pie.update();
+          lineChart.update();
+        }
+      }
+    }
+  }
+  pie = new Chart("pie", picConfig);
+
+  // line chart
+
+
+  let lineLabels = [];
+  for (let i = beginYear; i < endYear; i++) MONTHS_labels.forEach((o) => lineLabels.push(i + ' ' + o))
+  const data = {
+    labels: lineLabels,
+    datasets: mydata.map(function (v, index) {
+      return {
+        label: cityList[index],
+        data: v,
+        fill: false,
+        borderColor: mycolor[index],
+        tension: 0.1
+      }
+    }
+    )
+  };
+  const lineConfig = {
+    type: 'line',
+    data: data,
+    options: {
+
+      maintainAspectRatio: false,
+      responsive: true,
+      plugins: {
+        title:{
+          display:true,
+          text:'歷年車禍次數統計',
+          font:{
+            size:24
+          }
+        },
+        legend: {
+          display: false
+        },
+      },
+    }
+  };
+  lineChart = new Chart(document.getElementById("line").getContext("2d"), lineConfig);
+
+
+  let tmpColor = cityList.map((v, i, a) => mycolor[xValues.indexOf(v)]); //citylist
+  //https://unpkg.com/us-atlas/states-10m.json
+  //https://raw.githubusercontent.com/markmarkoh/datamaps/master/src/js/data/twn.json 
+  fetch('../static/tw.json').then((r) => r.json()).then((tw) => {
+    let nation; //tw.json
+    let county = Array(22);//citylist
+
+    nation = ChartGeo.topojson.feature(tw, tw.objects.twn).features;
+
+    // change order to match sort labels
+    nation.forEach((v, i) => {
+      if (v.properties.name == 'Kinmen') {
+        shiftPosition(v, [119.656977 - 118.383044, 24.266385 - 24.453753]);
+      }
+      else if (v.properties.name == 'Lienchiang') {
+        shiftPosition(v, [119.752654 - 119.946202, 24.831802 - 26.161494]);
+      }
+      county[cityList.indexOf(mapping_to_chinese[v.properties.name])] = v;
+    })
+    // map color
+    const mapConfig = {
+      type: 'choropleth',
+      data: {
+        labels: cityList,
+        datasets: [{
+          label: 'States',
+          outline: county,
+          data: county.map((d, i) => ({ feature: d, value: yValues[xValues.indexOf(cityList[i])] })),
+          backgroundColor: tmpColor
+        }]
+      },
+      options: {
+        showOutline: true,
+        showGraticule: false,
+        maintainAspectRatio: false,
+        responsive: true,
+
+        scales: {
+          xy: {
+            projection: 'equirectangular',
+            padding: 0,
+
+          },
+          color: {
+            display: false
+          }
+        },
+        plugins: {
+          legend: {
+            display: false
+          },
+        },
+        animation: {
+          duration: 1
+        },
+        onClick: (evt, el) => {
+          // exist element
+          // map click
+          if (el[0]) {
+            const index = el[0].index;
+            const sortedIndex = toSortedIndex(index);
+            if (isShowing[index]) {
+              // hide
+              chartMap.data.datasets[0].backgroundColor[index] = GREY;
+              pie.hide(el[0].datasetIndex, sortedIndex);
+              lineChart.hide(index);
+            }
+            else {
+              //show
+              chartMap.data.datasets[0].backgroundColor[index] = mycolor[sortedIndex];
+              pie.show(el[0].datasetIndex, sortedIndex);
+              lineChart.show(index);
+            }
+            isShowing[index] = !isShowing[index];
+            chartMap.update();
+            lineChart.update();
+            pie.update();
+          }
+        },
+      }
+    };
+    chartMap = new Chart(document.getElementById("map").getContext("2d"), mapConfig);
+  }).then(()=>initCallback());
+
+
+
+
+  function toCityListIndex(sortedIndex) {
+    return cityList.indexOf(xValues[sortedIndex]);
+  }
+  function toSortedIndex(cityListIndex) {
+    return xValues.indexOf(cityList[cityListIndex]);
+  }
+  function shiftPosition(v, offset) {
+    for (let i = 0; i < v.geometry.coordinates.length; i++) {
+      v.geometry.coordinates[i][0].forEach(function (v, o, a) {
+        a[o][0] += offset[0];
+        a[o][1] += offset[1];
+      })
+    }
+  }
+
+  function changeValueY(newArr) {
+    //sort
+    let list = [];
+    for (var j = 0; j < newArr.length; j++)
+      list.push({ 'x': cityList[j], 'y': newArr[j] });
+
+    list.sort(function (a, b) {
+      return ((a.y < b.y) ? 1 : ((a.y == b.y) ? 0 : -1));
+    });
+
+    const maxValue = list[0].y;
+    for (var k = 0; k < list.length; k++) {
+      xValues[k] = list[k].x;
+      yValues[k] = list[k].y;
+      mycolor[k] = colorScalar[21 - parseInt(yValues[k] / maxValue * 21)];
+      const index = toCityListIndex(k);
+      if (isShowing[index]) {
+        pie.show(0, k);
+        tmpColor[index] = mycolor[k];
+      }
+      else {
+        pie.hide(0, k);
+        tmpColor[index] = GREY;
+      }
+      chartMap.data.datasets[0].data[index].value = yValues[k];
+    }
+    pie.update();
+    chartMap.update();
+
+  }
+  function changeLineChart(begin, end) {
+    for (let i = begin; i < end; i++) {
+      lineLabels.push((beginYear + parseInt(i / 12)) + ' ' + MONTHS_labels[i % 12]);
+
+    }
+    lineChart.data.datasets.forEach(function (v, i, arr) {
+      arr[i].data = mydata[i].slice(begin, end);
+      arr[i].borderColor = mycolor[toSortedIndex(i)];
+    })
+    lineChart.data.labels = lineLabels;
+    lineChart.update();
+  }
+
+
+  // time line
+
+  // html element
+  const timeLine = document.getElementById("timeLine");
+  const myBackGround = document.getElementById("background");
+  const border = document.getElementById("myborder");
+  const mybody = document.getElementById("mybody");
+
+  // define
+  const oneStep = 10;
+  const widthMax = month * oneStep;
+  const timeLine_Left_X = timeLine.getBoundingClientRect().x;
+  let drap = false;
+  let move = false;
+  let left = true;
+  let leftX = oneStep * 12.1; // 2019
+  let rightX = leftX + oneStep * 12 - getCSS(border, 'padding-right') - getCSS(border, 'padding-right'); // 2020
+  let moveOffset = 0;
+
+  // init
+  myBackGround.style.setProperty('width', widthMax + 'px');
+  border.style.setProperty('margin-left', leftX + 'px');
+  border.style.setProperty('width', rightX - leftX + 'px');
+  // load finish
+  function initCallback(){
+    drap = true;
+    endEvent();
+  }
+  // background
+  var canvas2 = document.createElement("canvas");
+  var ctx = canvas2.getContext("2d");
+  canvas2.width = getCSS(myBackGround, 'width');
+  ctx.beginPath();
+  ctx.font = "14px Comic Sans MS";
+  for (var i = 1; i <= month; i += 1) {
+    var y = 40;
+    if (i % 12 == 0) {
+      var y = 20;
+    }
+    else if (i % 6 == 0) {
+      var y = 30;
+    }
+    let x = i * oneStep;
+    if (y == 20) {
+      ctx.strokeText(beginYear + i / 12 + "", x, 20);
+    }
+    ctx.moveTo(x, y);
+    ctx.lineTo(x, 80);
+  }
+  ctx.stroke();
+  const img = canvas2.toDataURL('image/png', 1);
+  myBackGround.style.setProperty('background', 'url(' + img + ')')
+
+
+  // scroll Y
+  timeLine.addEventListener('wheel', function (event) {
+    this.scrollLeft += event.deltaY;
+    event.preventDefault();
+  });
+
+  // window scroll event
+  const toptop = 80;
+  document.addEventListener('scroll', function (e) {
+    if (getComputedStyle(topLayer).getPropertyValue('position') == 'relative' && topLayer.getBoundingClientRect().top < -0.1) {
+      topLayer.style.setProperty('position', 'fixed');
+    }
+    else if (getComputedStyle(topLayer).getPropertyValue('position') == 'fixed' && window.scrollY < toptop) {
+      topLayer.style.setProperty('position', 'relative');
+    }
+  });
+
+  // mobile event
+  border.addEventListener('touchstart', function (event) {
+    startEvent(event.touches[0].clientX);
+  });
+  timeLine.addEventListener('touchmove', function (event) {
+    if (drap) { // change border(left or right)
+      event.preventDefault();
+      drapEvent(event.touches[0].clientX);
+    }
+    else if (move) { // move whole box
+      event.preventDefault();
+      moveEvent(event.touches[0].clientX);
+    }
+  });
+  timeLine.addEventListener('touchend', function (event) {
+    endEvent();
+  });
+
+  // PC event
+  border.addEventListener('mousedown', function (event) {
+    startEvent(event.clientX);
+  });
+  timeLine.addEventListener('mousemove', function (event) {
+    if (drap) { // change border
+      drapEvent(event.clientX);
+    }
+    else if (move) {
+      moveEvent(event.clientX);
+    }
+  });
+  timeLine.addEventListener('mouseup', function (event) {
+    endEvent();
+  });
+
+
+  function startEvent(x) {
+    if (event.target.id == border.id) {
+      drap = true;
+      let bbox = border.getBoundingClientRect();
+      left = (Math.abs(bbox.left - x) < Math.abs(bbox.right - x));
+    }
+    else if (event.target.id == mybody.id) {
+      move = true;
+      moveOffset = position_in_wholeWidth(x) - getCSS(border, 'margin-left');
+
+    }
+  }
+  function moveEvent(x) {// move whole box
+    autoScroll(x);
+    const borderLeft = getCSS(border, 'margin-left');
+    const borderRight = borderLeft + getCSS(border, 'width');
+    const newPos = Math.min(Math.max(position_in_wholeWidth(x) - getCSS(border, 'padding-left'), leftX), widthMax);
+    const shift = newPos - moveOffset - borderLeft;
+    if (shift < 0 && borderLeft + shift < 0 || shift > 0 && borderRight + shift > widthMax) {
+      return;
+    }
+    leftX = borderLeft + shift;
+    rightX = borderRight + shift;
+    border.style.setProperty('margin-left', leftX + 'px');
+  }
+
+  function drapEvent(x) {// change border(left or right)
+    if (left) {
+      const oldBorderLeft = getCSS(border, 'margin-left');
+      const oldWidth = getCSS(border, 'width');
+
+      const newPos = Math.min(Math.max(position_in_wholeWidth(x), 0), rightX);
+      leftX = newPos;
+      border.style.setProperty('margin-left', newPos + 'px');
+      border.style.setProperty('width', oldWidth - newPos + oldBorderLeft + 'px');
+    }
+    else {
+      const newPos = Math.min(
+        Math.max(
+          position_in_wholeWidth(x) - getCSS(border, 'padding-right') - getCSS(border, 'padding-left'),
+          leftX
+        ),
+        widthMax
+      );
+      rightX = newPos;
+      border.style.setProperty('width', newPos - getCSS(border, 'margin-left') + 'px');
+
+    }
+    autoScroll(x);
+  }
+
+  function endEvent() {
+    if (drap || move) {
+      // calc
+      let bbox = border.getBoundingClientRect();
+      let begin = month * totalRatioX(bbox.left);
+      let end = month * totalRatioX(bbox.right + getCSS(border, 'padding-right'));
+      selectTime(parseInt(begin), parseInt(end));
+
+      drap = false;
+      move = false;
+    }
+  }
+
+
+  function totalRatioX(clientX) {
+    return position_in_wholeWidth(clientX) / getCSS(myBackGround, 'width');
+  }
+  function ratioX(clientX) {
+    return distance_to_backgroundLeft(clientX) / Math.min(getCSS(timeLine, 'width'), getCSS(myBackGround, 'width'));
+  }
+
+  function selectTime(begin, end) {
+    begin = Math.max(begin, 0);
+    end = Math.min(end, month);
+    if (begin > end) {
+      return;
+    }
+    lineLabels = []
+    let v = Array(22);
+    for (let i = 0; i < 22; i++) {
+      v[i] = 0;
+      for (let o = begin; o < end; o++) {
+        v[i] += mydata[i][o];
+      }
+    }
+    changeValueY(v);
+    changeLineChart(begin, end);
+
+  }
+
+
+  function distance_to_backgroundLeft(x) {
+    // mouse position(window) to background left X
+    // look like
+    return x - timeLine_Left_X - getCSS(myBackGround, 'margin-left');
+  }
+
+  function position_in_wholeWidth(x) {
+    // mouse position(window) to background left X
+    // real width
+    return distance_to_backgroundLeft(x) + timeLine.scrollLeft;
+  }
+
+  function autoScroll(x) {
+    // auto scroll when close border
+    let ratio = ratioX(x);
+    if (ratio > 0.8) {
+      timeLine.scrollLeft += 10;
+    }
+    else if (ratio < 0.2) {
+      timeLine.scrollLeft -= 10;
+    }
+  }
+
+  function getCSS(ele, v) {
+    return parseFloat(getComputedStyle(ele).getPropertyValue(v))
+  }
+
+</script>
+
+</html>

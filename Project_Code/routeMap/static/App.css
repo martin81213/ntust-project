@@ -1,0 +1,651 @@
+/* Always set the map height explicitly to define the size of the div
+  * element that contains the map. */
+  #map {
+  height: 100%;
+  
+}
+
+/* Optional: Makes the sample page fill the window. */
+html,
+body {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+#description {
+  font-family: Roboto;
+  font-size: 15px;
+  font-weight: 300;
+}
+
+#infowindow-content .title {
+  font-weight: bold;
+}
+
+#infowindow-content {
+  display: none;
+}
+
+#map #infowindow-content {
+  display: inline;
+}
+
+/* chose position */
+#pac-card {
+  display: inline;
+  align-content: space-between;
+  background-color: rgba(255, 255, 255, 0.745);
+  border: 0;
+  border-radius: 5px;
+  box-shadow: 0 1px 4px -1px rgb(0 0 0 / 30%);
+  font: 18px Roboto, Arial, sans-serif;
+  overflow: hidden;
+  font-family: Roboto;
+  padding-left: 10px;
+  margin-top:10px;
+  margin-left: 10px;
+  padding:2px;
+  max-width: 90vw;
+}
+
+.form-group {
+  top: 0px;
+  display: inline-flex;
+  flex-direction: row;
+}
+.form-control {
+  font-size: 18px;
+}
+.button{
+  height: 18px;
+}
+
+.Taiwan{
+  height: 40px;
+  width:125px;
+  margin-left: 10px;
+}
+.TaiSituation{
+  height: 40px;
+  width:125px;
+  margin-left: 10px;
+}
+/* menu */
+.menu {
+  position: absolute;
+
+  z-index: 10;
+  margin-left: 0px;
+  margin-top: 10vh;
+  height: 80vh;
+  border: none;
+  border-radius: 10px;
+  pointer-events: none;
+  display: block;
+  min-width: 100vw;
+  overflow-y:auto;
+  max-height: 100vh;
+}
+
+
+
+/* menu show/hide button  */
+.menuBtn {
+  font-size: 10px;
+  width: 40px;
+  height: 40px;
+  margin-top: 20vh;
+  background-color: #5B808B;
+  color: #fff;
+  border-radius: 3px;
+  font-size: 25px;
+  cursor: pointer;
+  pointer-events: auto;
+  display: block;
+  float: left;
+  cursor: pointer;
+}
+
+
+
+.menuBtn:hover {
+  color: #88999F;
+  background-color: #fff;
+}
+
+/* leftMenu */
+.leftMenu {
+  background-color: #B7E8FA;
+  max-width: 325px;
+  min-width: 300px;
+  height: 80vh;
+  width: 70vw;
+  
+  display: block;
+  pointer-events: auto;
+  float: left;
+  position: absolute;
+  transition: left 0.8s ease;
+  /*transform: translate(-40vw);*/
+  left: -150vw;
+  -webkit-user-select:none;
+  -moz-user-select:none;
+  -o-user-select:none;
+  user-select:none;
+}
+
+.leftMenu-show {
+  /*transform: translate(0vw);*/
+  left: 0vw;
+  position: relative;
+  transition: left 0.8s ease;
+}
+
+
+
+/* back/closr button */
+#controlButton {
+  height: 40px;
+  width: 40px;
+  background-color: #B7E8FA;
+  z-index: 2;
+  margin-top: 10px;
+  margin-left: 10px;
+  cursor: pointer;
+  color: #fff;
+}
+
+#controlButton:hover {
+  color: #88999F;
+}
+
+/* content(page) class */
+.MenuContent {
+  background-color: #E9FFFF;
+  width: 90%;
+  bottom: 20%;
+  margin: auto;
+  margin-top: 10px;
+  height: 85%;
+  z-index: 3;
+  overflow-x: hidden;
+  overflow-y: auto;
+
+}
+
+
+/* page label */
+.MenuContent-word {
+  font-size: 24px;
+  text-align: center;
+}
+
+/* route page */
+#routePage {
+  display: none;
+}
+
+.routeItem {
+  border: solid 1px;
+  max-width: 375px;
+  min-width: 350px;
+  height: 150px;
+  background-color: aliceblue;
+
+}
+
+.routeItem-word {
+  float: left;
+  margin-top: 33px;
+  margin-left: 30px;
+  font-size: 24px;
+  max-width: 100%;
+  white-space: space-between;
+  ;
+  word-wrap: break-word;
+  background-color: aliceblue;
+}
+
+.routeItem-showEventButton {
+  
+  display: inline;
+  align-content: space-between;
+  position: relative;
+  flex-direction: column;
+  top: 25px;
+  left: 40px;
+  padding: 8px 10px;
+  border: 5px;
+  border-radius: 5px;
+  font-size: 18px;
+  cursor: pointer;
+  background-color: #5B808B;
+  color: #fff;
+}
+
+.routeItem-showEventButton:hover {
+  color: #88999F;
+  background-color: #fff;
+}
+
+.routeItem-goButton {
+  display: inline;
+  align-content: space-between;
+  position: relative;
+  flex-direction: column;
+  top: 25px;
+  left: 22px;
+  padding: 8px 10px;
+  border: 5px;
+  border-radius: 5px;
+  font-size: 18px;
+  cursor: pointer;
+  background-color: #5B808B;
+  color: #fff;
+}
+
+.routeItem-goButton:hover {
+  color: #88999F;
+  background-color: #fff;
+}
+
+/* form page */
+#formPage {
+  display: none;
+}
+
+/****************************************************************** */
+#eventForm {
+  background-color: #f2f2f2;
+  margin-left: -3px;
+  width: 300px;
+  box-sizing: border-box;
+}
+
+.input[type=text],
+.select,
+.textarea {
+  width: 80%;
+  padding: 12px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  resize: vertical;
+}
+
+label {
+  padding: 8px 0px 2px 0;
+  display: inline-block;
+}
+
+input[type=submit] {
+  position: relative;
+    bottom: 3px;
+    margin-right: 5%;
+    background-color: #4CAF50;
+    color: white;
+    padding: 12px 20px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    float: right;
+}
+
+input[type=submit]:hover {
+  background-color: #45a049;
+}
+
+.container {
+  border-radius: 5px;
+  background-color: #f2f2f2;
+  padding: 20px;
+}
+
+.col-25 {
+  float: left;
+  width: 25%;
+  margin-top: 3px;
+}
+
+.col-75 {
+  float: left;
+  width: 75%;
+  margin-top: 3px;
+}
+
+/* 清除浮動 */
+.row:after {
+  content: "";
+  display: table;
+  clear: both;
+}
+
+/* 響應式佈局 layout - 在螢幕寬度小於 600px 時， 設定為上下堆疊元素 */
+@media screen and (max-width: 600px) {
+
+  .leftmenu {
+    position: absolute;
+    z-index: 1;
+    margin-left: 0px;
+    margin-top: 10vh;
+    font-size: medium;
+    border: none;
+    border-radius: 10px;
+    pointer-events: none;
+    display: block;
+    min-width: 0px;
+  }
+  input[type=submit] {
+    width: 100%;
+    margin-top: 0;
+  }
+}
+
+/* 8888888888888888888888888888888888888888888888888888888888888888888888888888 */
+
+
+#preview_progressbarTW_img {
+    position: relative;
+    top: 12px;
+    max-width: 160px;
+    max-height: 80px;
+}
+
+
+.ui-dialog-titlebar-close {
+  /* hide dialog close button*/
+  visibility: hidden;
+}
+
+
+/* event list */
+#eventPointPage {
+  display: none;
+}
+
+.eventItem {
+  border: solid 1px;
+  height: auto;
+  background-color: aliceblue;
+  cursor: pointer;
+}
+.eventItem:hover {
+  border: solid 1px;
+  height: auto;
+  background-color: #fff;
+}
+
+.eventItem-title {
+  font-size: 24px;
+  float: left;
+  word-wrap: break-word;
+  max-width: 65%;
+  min-width: 65%;
+  min-height: 100px;
+
+}
+
+.eventItem-pushNum {
+  font-size: 30px;
+  float: right;
+  margin: 10px;
+}
+
+.eventItem-time {
+  float: right;
+  text-align: right;
+  white-space: pre-line;
+  margin-right: 10px;
+}
+
+
+/* detail page */
+#eventDetailPage {
+  display: none;
+}
+
+.detail-top {
+  border: solid 1px;
+  height: auto;
+  background-color: aliceblue;
+
+}
+
+.detail-bottom {
+  border: solid 1px;
+  border-top: 0px;
+  background-color: aliceblue;
+}
+
+.detail-title {
+  font-size: 30px;
+  float: left;
+  word-wrap: break-word;
+  background-color: #f0f8ff;
+  min-width: 95%;
+  min-height: 30px;
+  padding: 10px;
+}
+
+.detail-pushNum {
+  font-size: 25px;
+  float: right;
+  margin: 10px;
+
+}
+
+.detail-btn {
+  /* width: 100px;
+  height: 50px;
+  float: right; */
+  position: relative;
+  font-size: medium;
+  bottom: 3px;
+  margin-right: 5%;
+  background-color: #88999F;
+  padding: 12px 20px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  float: right;
+  cursor: pointer;
+  color: #fff;
+}
+
+.detail-btn:hover {
+  color: #88999F;
+  background-color: #fff;
+}
+.detail-state {
+  padding: 8px 0px 2px 2px;
+  display: inline-block;
+  /* font-size: 20px;
+  float: left;
+  width: 70px;
+  clear: left;
+  margin-bottom: 10px;
+  margin-left: 10px; */
+}
+
+.detail-value {
+  width: 80%;
+  padding: 15px;
+  font-size: 20px;
+  float: left;
+}
+
+.detail-img {
+  max-width: 90%;
+  margin-left: 10px;
+  margin-right: 10px;
+  margin-bottom: 10px;
+
+}
+
+.detail-describe {
+  white-space: pre-line;
+  width: 80%;
+  padding: 12px;
+  font-size: 20px;
+  float: left;
+  margin-bottom: 10px;
+}
+
+
+/* main page */
+#main_panel {
+  display: none;
+}
+
+#main_panel button {
+  padding: 8px 0px 2px 0;
+  display: inline;
+  flex-direction: column;
+  align-content: space-between;
+  border: 0;
+  margin-left: 3%;
+  margin-top: 2%;
+  margin-bottom: 9%;
+  background-color: #5B808B;
+  color: #fff;
+  border-radius: 3px;
+  font-size: 25px;
+  cursor: pointer;
+}
+
+#main_panel button:hover {
+  color: #88999F;
+  background-color: #fff;
+}
+
+/* your page CSS 
+      #{your page id} {
+        display: none;
+      }
+      
+      {other content... }
+      
+      */
+
+
+.fa-map-marker-alt,
+.fa-dot-circle {
+  color: #5bc0de;
+}
+
+/*Jumbotron*/
+.jumbotron {
+  background-color: transparent;
+  margin: 0;
+  padding: 10px;
+}
+
+.jumbotron h1 {
+  letter-spacing: 2.5px;
+  font-size: 3.5em;
+}
+
+.jumbotron h1,
+.jumbotron p {
+  text-align: center;
+}
+
+.body {
+  color: #5bc0de;
+  font-family: "Poppins", sans-serif;
+}
+
+/*map*/
+#googleMap {
+  width: 100%;
+  height: 650px;
+  margin: 10px auto;
+}
+
+/*output box*/
+#output {
+  text-align: center;
+  font-size: 2em;
+  margin: 20px auto;
+}
+
+#mode {
+  color: black;
+}
+
+#pac-container {
+  padding-bottom: 12px;
+  margin-right: 12px;
+}
+
+.pac-controls {
+  display: inline-block;
+  padding: 5px 11px;
+}
+
+.pac-controls label {
+  font-family: Roboto;
+  font-size: 13px;
+  font-weight: 300;
+}
+
+#pac-input {
+  background-color: #fff;
+  font-family: Roboto;
+  font-size: 25px;
+  font-weight: 300;
+  margin-left: 12px;
+  padding: 0 11px 0 13px;
+  text-overflow: ellipsis;
+  width: 400px;
+}
+
+#pac-input:focus {
+  border-color: #4d90fe;
+}
+
+#title {
+  color: #fff;
+  background-color: #4d90fe;
+  font-size: 25px;
+  font-weight: 500;
+  padding: 6px 12px;
+}
+/* to separate different application*/
+.hotbutton{
+  display: inline-flex;
+  font-size: 25px;
+  background-color: #1c9592;
+  margin-left: 3%;
+  margin-top: 2%;
+  margin-bottom: 9%;
+  border-radius: 3px;
+  cursor: pointer;
+  border: 0;
+  color: #fff;
+ 
+}
+#routeBtn,#blockBtn{
+  display: inline-flex;
+  flex-direction: column-reverse;
+  justify-content: flex-start;
+  font-size: 23px;
+  background-color: #1c9592;
+  margin-left: 3%;
+  margin-bottom: 9%;
+  border-radius: 3px;
+  cursor: pointer;
+  border: 0;
+  color: #fff;
+}
+.hotbutton:hover,#routeBtn:hover,#blickBtn:hover {
+  color: #88999F;
+  background-color: #fff;
+}
+
+.icon__ {
+  width: 30px;
+  height: 30px;
+  margin-left: 5px;
+  margin-top: 3px;
+}
